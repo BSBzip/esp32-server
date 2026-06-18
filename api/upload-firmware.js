@@ -31,8 +31,12 @@ export default async function handler(req, res) {
 
     try {
       const note     = req.headers['x-note'] || '';
-      const filename = `firmware-${Date.now()}.bin`;
+      const filename = `firmware-${Date.now()}-${Math.random().toString(36).slice(2)}.bin`;
       const body     = await readBody(req);
+
+      if (body.length > 2 * 1024 * 1024) {
+        return res.status(413).json({ error: 'File too large (max 2 MB)' });
+      }
 
       const { error: uploadError } = await supabase.storage
         .from('firmware')

@@ -8,8 +8,12 @@ const supabase = createClient(
 export async function getUser(req) {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return null;
-  const { data: { user } } = await supabase.auth.getUser(token);
-  return user || null;
+  try {
+    const { data: { user } } = await supabase.auth.getUser(token);
+    return user || null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getRole(userId) {

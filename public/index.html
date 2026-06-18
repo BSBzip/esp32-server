@@ -735,12 +735,15 @@
       if (!file) { setMsg('ota-status', 'err', '✕ Please select a .bin file first.'); return; }
 
       setMsg('ota-status', '', 'Uploading firmware...');
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 60000);
       fetch('/api/upload-firmware', {
         method: 'POST',
         headers: { 'Content-Type': 'application/octet-stream', 'x-note': note, Authorization: 'Bearer ' + authToken },
-        body: file
+        body: file,
+        signal: ctrl.signal
       })
-      .then(r => r.json())
+      .then(r => { clearTimeout(timer); return r.json(); })
       .then(d => {
         if (d.error) throw new Error(d.error);
         setMsg('ota-status', 'ok', '✓ Uploaded. Press "Send Update to ESP32" to install.');
@@ -749,22 +752,26 @@
         document.getElementById('drop-zone').classList.remove('has-file');
         document.getElementById('ota-note').value  = '';
       })
-      .catch(e => setMsg('ota-status', 'err', '✕ Upload failed: ' + e.message));
+      .catch(e => setMsg('ota-status', 'err', '✕ Upload failed: ' + (e.name === 'AbortError' ? 'Request timed out' : e.message)));
     }
 
     function sendUpdateCommand() {
+      if (!confirm('Send update command?\n\nThe ESP32 will download the new firmware and reboot. Make sure you have uploaded the correct .bin file first.')) return;
       setMsg('update-status', '', 'Sending update command...');
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
       fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
-        body: JSON.stringify({ message: 'update' })
+        body: JSON.stringify({ message: 'update' }),
+        signal: ctrl.signal
       })
-      .then(r => r.json())
+      .then(r => { clearTimeout(timer); return r.json(); })
       .then(d => {
         if (d.error) throw new Error(d.error);
         setMsg('update-status', 'ok', '✓ Update command sent — ESP32 will reboot shortly.');
       })
-      .catch(e => setMsg('update-status', 'err', '✕ Failed: ' + e.message));
+      .catch(e => setMsg('update-status', 'err', '✕ Failed: ' + (e.name === 'AbortError' ? 'Request timed out' : e.message)));
     }
 
     // ── HELPERS ────────────────────────────────────────────────
