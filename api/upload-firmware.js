@@ -1,9 +1,8 @@
-import { put } from '@vercel/blob';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_PUBLISHABLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 function readBody(req) {
@@ -28,15 +27,19 @@ export default async function handler(req, res) {
       const filename = `firmware-${Date.now()}.bin`;
       const body     = await readBody(req);
 
-      const blob = await put(filename, body, {
-        access: 'public',
-        contentType: 'application/octet-stream',
-      });
+      const { error: uploadError } = await supabase.storage
+        .from('firmware')
+        .upload(filename, body, { contentType: 'application/octet-stream' });
 
-      const { error } = await supabase.from('firmware').insert({ url: blob.url, note });
-      if (error) return res.status(500).json({ error: error.message });
+      if (uploadError) return res.status(500).json({ error: uploadError.message });
 
-      return res.status(200).json({ url: blob.url });
+      const { error: dbError } = await supabase
+        .from('firmware')
+        .insert({ url: filename, note });
+
+      if (dbError) return res.status(500).json({ error: dbError.message });
+
+      return res.status(200).json({ ok: true });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }
