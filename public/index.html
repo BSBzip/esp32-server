@@ -541,12 +541,20 @@
             <div class="xp-msg" id="ota-status"></div>
           </div>
           <div class="xp-group">
+            <div class="xp-group-label">Deploy to ESP32</div>
+            <p style="font-size:12px;color:#444;margin:0 0 10px;">After uploading firmware above, press this button to send the update command. The ESP32 will download and install the new firmware then reboot automatically.</p>
+            <div class="xp-btn-row">
+              <button class="xp-btn xp-btn-blue" onclick="sendUpdateCommand()">🚀 Send Update to ESP32</button>
+            </div>
+            <div class="xp-msg" id="update-status"></div>
+          </div>
+          <div class="xp-group">
             <div class="xp-group-label">How to update the ESP32 wirelessly</div>
             <ol class="xp-howto">
               <li>Make your code changes in VS Code</li>
               <li>Click the <strong>✓ checkmark</strong> in VS Code to build</li>
               <li>Upload the <code>firmware.bin</code> file using the form above</li>
-              <li>Go to the <strong>Commands</strong> tab and send <code>update</code></li>
+              <li>Press <strong>Send Update to ESP32</strong> — no need to go to Commands</li>
               <li>The ESP32 downloads and installs automatically, then reboots</li>
             </ol>
           </div>
@@ -735,13 +743,28 @@
       .then(r => r.json())
       .then(d => {
         if (d.error) throw new Error(d.error);
-        setMsg('ota-status', 'ok', '✓ Uploaded. Go to Commands and send "update" to install.');
+        setMsg('ota-status', 'ok', '✓ Uploaded. Press "Send Update to ESP32" to install.');
         document.getElementById('bin-file').value  = '';
         document.getElementById('drop-label').innerText = '📁 Click to browse for .bin file...';
         document.getElementById('drop-zone').classList.remove('has-file');
         document.getElementById('ota-note').value  = '';
       })
       .catch(e => setMsg('ota-status', 'err', '✕ Upload failed: ' + e.message));
+    }
+
+    function sendUpdateCommand() {
+      setMsg('update-status', '', 'Sending update command...');
+      fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
+        body: JSON.stringify({ message: 'update' })
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) throw new Error(d.error);
+        setMsg('update-status', 'ok', '✓ Update command sent — ESP32 will reboot shortly.');
+      })
+      .catch(e => setMsg('update-status', 'err', '✕ Failed: ' + e.message));
     }
 
     // ── HELPERS ────────────────────────────────────────────────
