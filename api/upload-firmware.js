@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { getUser, getRole } from './_auth.js';
 
+export const config = {
+  api: { bodyParser: false },
+};
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
