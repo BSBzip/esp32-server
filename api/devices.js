@@ -8,26 +8,22 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  if (req.method === 'POST') {
+  if (req.method === 'GET') {
     const user = await getUser(req);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { message, device_id } = req.body;
-    if (!message || typeof message !== 'string') return res.status(400).json({ error: 'No message provided' });
-    if (message.length > 200) return res.status(400).json({ error: 'Message too long (max 200 chars)' });
+    const { data, error } = await supabase
+      .from('devices')
+      .select('id, name, last_seen')
+      .order('last_seen', { ascending: false });
 
-    const row = { message };
-    if (device_id && typeof device_id === 'string') row.device_id = device_id;
-
-    const { error } = await supabase.from('messages').insert(row);
     if (error) return res.status(500).json({ error: error.message });
-
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ devices: data || [] });
   }
 
   res.status(405).json({ error: 'Method not allowed' });

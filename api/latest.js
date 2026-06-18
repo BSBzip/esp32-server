@@ -9,12 +9,20 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   if (req.method === 'GET') {
-    const { data, error } = await supabase
+    const deviceId = req.query.device_id || null;
+
+    let query = supabase
       .from('messages')
       .select('id, message')
       .eq('delivered', false)
       .order('created_at', { ascending: true })
       .limit(1);
+
+    if (deviceId) {
+      query = query.or(`device_id.eq.${deviceId},device_id.is.null`);
+    }
+
+    const { data, error } = await query;
 
     if (error) return res.status(500).json({ error: error.message });
     if (!data || data.length === 0) return res.status(200).json({ message: '' });

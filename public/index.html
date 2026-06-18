@@ -31,10 +31,7 @@
     }
 
     /* ── APPLE 1984 RAINBOW BAR ─────────────────────────────── */
-    .rainbow-bar {
-      display: flex;
-      height: 9px;
-    }
+    .rainbow-bar { display: flex; height: 9px; }
     .rainbow-bar div { flex: 1; }
     .rb-1 { background: #FF2D00; }
     .rb-2 { background: #FF9300; }
@@ -176,7 +173,7 @@
     }
 
     .xp-input:focus { border-color: #316AC5; background: #FAFEFF; }
-    .xp-select { cursor: pointer; }
+    .xp-select { cursor: pointer; margin-bottom: 0; }
 
     /* ── BUTTONS ────────────────────────────────────────────── */
     .xp-btn {
@@ -249,6 +246,7 @@
       border-bottom: 1px solid #F0EDE4;
       display: flex;
       gap: 10px;
+      align-items: center;
     }
 
     .xp-list-row:hover { background: #C8DCF8; }
@@ -342,7 +340,43 @@
       font-size: 10px;
     }
 
-    /* ── LOGIN DIALOG ───────────────────────────────────────── */
+    /* ── LOGIN ──────────────────────────────────────────────── */
+    #login-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .login-dialog-wrap {
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 4px 4px 16px rgba(0,0,0,0.6);
+      overflow: hidden;
+      border-radius: 6px 6px 3px 3px;
+    }
+    .login-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .login-logo {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1E72D0 0%, #0A246A 100%);
+      border: 3px solid rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .login-title {
+      font-size: 22px; font-weight: bold; color: #fff;
+      letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .login-subtitle {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+      letter-spacing: 3px; text-transform: uppercase; margin-top: 6px;
+    }
     .dlg-titlebar {
       background: linear-gradient(to bottom,
         #4A7FBF 0%, #2B5FCC 8%, #0A246A 15%, #0A246A 85%, #1E4BA8 92%, #4A7FBF 100%);
@@ -355,68 +389,27 @@
       font-size: 12px;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
-
-    .dlg-body {
-      background: #ECE9D8;
-      padding: 20px;
-    }
-
+    .dlg-body { background: #ECE9D8; padding: 20px; }
     .dlg-separator {
       height: 1px;
       background: linear-gradient(to right, transparent, #ACA899, transparent);
       margin: 12px 0;
     }
 
-    /* ── SPINNING 911 GT3 ─────────────────────────────── */
-    #login-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
+    /* ── DEVICE STATUS ──────────────────────────────────────── */
+    .dev-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+      flex-shrink: 0;
     }
-    .login-dialog-wrap {
-      width: 100%;
-      max-width: 340px;
-      box-shadow: 4px 4px 16px rgba(0,0,0,0.6);
-      overflow: hidden;
-      border-radius: 6px 6px 3px 3px;
-    }
-    .gt3-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .gt3-svg {
-      width: 360px;
-      max-width: 94vw;
-      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.7));
-      animation: gt3-spin 5s linear infinite;
-    }
-    @keyframes gt3-spin {
-      from { transform: perspective(1000px) rotateY(0deg); }
-      to   { transform: perspective(1000px) rotateY(360deg); }
-    }
-    .gt3-ground {
-      width: 260px;
-      max-width: 80vw;
-      height: 14px;
-      background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 70%);
-      margin-top: -6px;
-      animation: gt3-shadow 5s linear infinite;
-    }
-    @keyframes gt3-shadow {
-      0%,100% { transform: scaleX(1);    opacity: 0.55; }
-      25%      { transform: scaleX(0.06); opacity: 0.08; }
-      50%      { transform: scaleX(1);    opacity: 0.55; }
-      75%      { transform: scaleX(0.06); opacity: 0.08; }
-    }
-    .gt3-label {
-      font-size: 9px;
-      color: rgba(255,255,255,0.4);
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      margin-top: 6px;
-    }
+    .dev-dot.online  { background: #3A9E3A; box-shadow: 0 0 5px rgba(58,158,58,0.8); }
+    .dev-dot.offline { background: #999; }
+    .dev-name { font-weight: bold; flex: 1; min-width: 80px; }
+    .dev-mac  { color: #888; font-family: 'Courier New', monospace; font-size: 10px; }
+    .dev-seen { color: #888; font-size: 10px; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -424,14 +417,12 @@
   <!-- ── LOGIN ──────────────────────────────────────────────── -->
   <div id="login-wrap">
 
-    <!-- Spinning Porsche 911 GT3 -->
-    <div class="gt3-stage">
-      <img class="gt3-svg" src="/911gt3.png" alt="Porsche 911 GT3"/>
-      <div class="gt3-ground"></div>
-      <div class="gt3-label">Porsche 911 GT3</div>
+    <div class="login-header">
+      <div class="login-logo">🖥️</div>
+      <div class="login-title">ESP32 Command Center</div>
+      <div class="login-subtitle">Berkeley's Control Panel</div>
     </div>
 
-    <!-- Login Dialog -->
     <div class="login-dialog-wrap">
       <div class="rainbow-bar">
         <div class="rb-1"></div><div class="rb-2"></div><div class="rb-3"></div>
@@ -475,6 +466,7 @@
 
       <div class="xp-tabbar">
         <div class="xp-tab active" id="tab-commands" onclick="switchTab('commands')">📡 Commands</div>
+        <div class="xp-tab"        id="tab-devices"  onclick="switchTab('devices')">🔌 Devices</div>
         <div class="xp-tab" id="tab-users"    onclick="switchTab('users')"    style="display:none">👥 Users</div>
         <div class="xp-tab" id="tab-firmware" onclick="switchTab('firmware')" style="display:none">💾 Firmware</div>
       </div>
@@ -483,6 +475,12 @@
 
         <!-- Commands Tab -->
         <div class="tab-panel active" id="panel-commands">
+          <div class="xp-group">
+            <div class="xp-group-label">Target Device</div>
+            <select class="xp-select" id="device-select">
+              <option value="">📡 All Devices (broadcast)</option>
+            </select>
+          </div>
           <div class="xp-group">
             <div class="xp-group-label">Send Command</div>
             <label class="xp-label">Message — type <code style="background:#fff;border:1px solid #ACA899;padding:1px 5px">firework</code> to trigger the LCD animation:</label>
@@ -498,6 +496,27 @@
           </div>
         </div>
 
+        <!-- Devices Tab -->
+        <div class="tab-panel" id="panel-devices">
+          <div class="xp-group">
+            <div class="xp-group-label">Registered Devices</div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+              <button class="xp-btn" onclick="loadDevices()">↻ Refresh</button>
+            </div>
+            <div class="xp-listbox" id="device-list" style="max-height:260px;min-height:100px;"></div>
+            <div class="xp-msg" id="devices-status"></div>
+          </div>
+          <div class="xp-group">
+            <div class="xp-group-label">About Devices</div>
+            <p style="font-size:11px;color:#444;line-height:1.7;margin:0;">
+              Each ESP32 registers automatically by MAC address when it connects to WiFi.
+              <span class="dev-dot online"></span><strong>Online</strong> = checked in within the last 15 seconds.
+              Select a specific device in the Commands tab to target it directly, or leave on
+              "All Devices" to broadcast to every connected ESP32.
+            </p>
+          </div>
+        </div>
+
         <!-- Users Tab -->
         <div class="tab-panel" id="panel-users">
           <div class="xp-group">
@@ -507,7 +526,7 @@
             <label class="xp-label">Password:</label>
             <input type="password" class="xp-input" id="new-password" />
             <label class="xp-label">Role:</label>
-            <select class="xp-select" id="new-role">
+            <select class="xp-select" id="new-role" style="margin-bottom:8px;">
               <option value="user">User — can send commands only</option>
               <option value="admin">Admin — can send commands and upload firmware</option>
             </select>
@@ -542,7 +561,7 @@
           </div>
           <div class="xp-group">
             <div class="xp-group-label">Deploy to ESP32</div>
-            <p style="font-size:12px;color:#444;margin:0 0 10px;">After uploading firmware above, press this button to send the update command. The ESP32 will download and install the new firmware then reboot automatically.</p>
+            <p style="font-size:12px;color:#444;margin:0 0 10px;">After uploading firmware above, press this button to send the update command to the device selected in the Commands tab (or all devices if none selected).</p>
             <div class="xp-btn-row">
               <button class="xp-btn xp-btn-blue" onclick="sendUpdateCommand()">🚀 Send Update to ESP32</button>
             </div>
@@ -567,6 +586,7 @@
           Signed in as: <strong id="sb-email">—</strong>
           <span id="sb-badge"></span>
         </div>
+        <div class="xp-sb-panel" id="sb-devices">No devices</div>
         <div class="xp-sb-panel">ESP32 Command Center</div>
         <div class="xp-sb-panel" style="padding:1px 4px;">
           <button class="xp-btn" style="min-width:0;padding:2px 10px;font-size:10px;" onclick="logout()">Sign Out</button>
@@ -584,13 +604,15 @@
       'sb_publishable_Qkg21mbk2gMhEQB2G99oAw_YkhE6bM1'
     );
 
-    var msgLog    = [];
-    var authToken = null;
-    var activeTab = 'commands';
+    var msgLog            = [];
+    var authToken         = null;
+    var activeTab         = 'commands';
+    var knownDevices      = [];
+    var deviceRefreshTimer = null;
 
     // ── TABS ──────────────────────────────────────────────────
     function switchTab(name) {
-      ['commands','users','firmware'].forEach(function(t) {
+      ['commands','devices','users','firmware'].forEach(function(t) {
         document.getElementById('tab-' + t)?.classList.remove('active');
         var p = document.getElementById('panel-' + t);
         if (p) p.classList.remove('active');
@@ -615,8 +637,10 @@
     }
 
     async function logout() {
+      stopDeviceRefresh();
       await sb.auth.signOut();
-      authToken = null;
+      authToken     = null;
+      knownDevices  = [];
       document.getElementById('main-wrap').style.display = 'none';
       document.getElementById('login-wrap').style.display = 'flex';
       document.getElementById('password').value = '';
@@ -639,6 +663,8 @@
       document.getElementById('main-wrap').style.display  = 'block';
 
       if (isAdmin) loadUsers();
+      await loadDevices();
+      startDeviceRefresh();
     }
 
     window.onload = async function() {
@@ -648,34 +674,117 @@
       document.getElementById('msg').addEventListener('keydown', function(e) { if (e.key==='Enter') sendMessage(); });
     };
 
+    // ── DEVICES ───────────────────────────────────────────────
+    async function loadDevices() {
+      if (!authToken) return;
+      var res = await fetch('/api/devices', { headers: { Authorization: 'Bearer ' + authToken } });
+      if (!res.ok) return;
+      var data = await res.json();
+      knownDevices = data.devices || [];
+
+      var now = Date.now();
+      var onlineCount = 0;
+
+      // Rebuild device selector, preserving previous selection
+      var sel  = document.getElementById('device-select');
+      var prev = sel.value;
+      sel.innerHTML = '<option value="">📡 All Devices (broadcast)</option>';
+      knownDevices.forEach(function(d) {
+        var ms     = d.last_seen ? (now - new Date(d.last_seen).getTime()) : Infinity;
+        var online = ms < 15000;
+        if (online) onlineCount++;
+        var opt = document.createElement('option');
+        opt.value       = d.id;
+        opt.textContent = (online ? '🟢' : '🔴') + ' ' + (d.name || d.id);
+        sel.appendChild(opt);
+      });
+      if (prev && knownDevices.find(function(d) { return d.id === prev; })) {
+        sel.value = prev;
+      }
+
+      // Rebuild devices tab list
+      var list = document.getElementById('device-list');
+      if (knownDevices.length === 0) {
+        list.innerHTML = '<div class="xp-list-row" style="color:#888;font-style:italic;padding:12px 8px;">' +
+          'No devices registered yet. Power on an ESP32 to see it appear here.</div>';
+      } else {
+        list.innerHTML = knownDevices.map(function(d) {
+          var ms     = d.last_seen ? (now - new Date(d.last_seen).getTime()) : Infinity;
+          var online = ms < 15000;
+          var seen   = d.last_seen ? fmtAge(ms) : 'never';
+          return '<div class="xp-list-row">' +
+            '<span class="dev-dot ' + (online ? 'online' : 'offline') + '"></span>' +
+            '<span class="dev-name">' + esc(d.name || d.id) + '</span>' +
+            '<span class="dev-mac">'  + esc(d.id) + '</span>' +
+            '<span class="dev-seen">' + seen + '</span>' +
+            '</div>';
+        }).join('');
+      }
+
+      // Status bar
+      document.getElementById('sb-devices').textContent =
+        onlineCount + ' device' + (onlineCount === 1 ? '' : 's') + ' online';
+    }
+
+    function startDeviceRefresh() {
+      stopDeviceRefresh();
+      deviceRefreshTimer = setInterval(loadDevices, 10000);
+    }
+
+    function stopDeviceRefresh() {
+      if (deviceRefreshTimer) { clearInterval(deviceRefreshTimer); deviceRefreshTimer = null; }
+    }
+
+    function fmtAge(ms) {
+      if (ms < 5000)    return 'just now';
+      if (ms < 60000)   return Math.floor(ms / 1000) + 's ago';
+      if (ms < 3600000) return Math.floor(ms / 60000) + 'm ago';
+      return Math.floor(ms / 3600000) + 'h ago';
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
     // ── MESSAGES ───────────────────────────────────────────────
     function sendMessage() {
-      var input = document.getElementById('msg');
-      var text  = input.value.trim();
+      var input    = document.getElementById('msg');
+      var text     = input.value.trim();
+      var deviceId = document.getElementById('device-select').value || null;
       if (!text) return;
 
       setMsg('msg-status', '', 'Sending...');
+      var body = { message: text };
+      if (deviceId) body.device_id = deviceId;
+
       fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify(body)
       })
       .then(r => r.json())
       .then(d => {
         if (d.error) throw new Error(d.error);
-        setMsg('msg-status', 'ok', '✓ Sent — ESP32 will pick it up within 3 seconds.');
-        addLog(text); input.value = '';
+        var dev    = deviceId ? knownDevices.find(function(d) { return d.id === deviceId; }) : null;
+        var target = dev ? (dev.name || dev.id) : 'All Devices';
+        setMsg('msg-status', 'ok', '✓ Sent to ' + target + ' — ESP32 will pick it up within 3 seconds.');
+        addLog(text, target);
+        input.value = '';
         setTimeout(() => setMsg('msg-status', '', ''), 5000);
       })
       .catch(e => setMsg('msg-status', 'err', '✕ ' + e.message));
     }
 
-    function addLog(text) {
+    function addLog(text, target) {
       var now = new Date().toLocaleTimeString();
-      msgLog.unshift({ text, time: now });
+      msgLog.unshift({ text: text, time: now, target: target || 'All' });
       if (msgLog.length > 20) msgLog.pop();
       document.getElementById('log').innerHTML = msgLog.map(function(e) {
-        return '<div class="xp-list-row"><span class="xp-list-time">' + e.time + '</span>' + e.text + '</div>';
+        return '<div class="xp-list-row">' +
+          '<span class="xp-list-time">' + e.time + '</span>' +
+          '<span style="flex:1">' + esc(e.text) + '</span>' +
+          '<span style="color:#888;font-size:10px;white-space:nowrap;">→ ' + esc(e.target) + '</span>' +
+          '</div>';
       }).join('');
     }
 
@@ -716,7 +825,7 @@
             ? '<span class="badge badge-user">User</span>'
             : '<span style="color:#888">No role</span>';
           var date = new Date(u.created_at).toLocaleDateString();
-          return '<div class="xp-list-row"><span class="xp-list-time">' + date + '</span>' + u.email + badge + '</div>';
+          return '<div class="xp-list-row"><span class="xp-list-time">' + date + '</span>' + esc(u.email) + badge + '</div>';
         }).join('');
       });
     }
@@ -735,7 +844,7 @@
       if (!file) { setMsg('ota-status', 'err', '✕ Please select a .bin file first.'); return; }
 
       setMsg('ota-status', '', 'Uploading firmware...');
-      const ctrl = new AbortController();
+      const ctrl  = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 60000);
       fetch('/api/upload-firmware', {
         method: 'POST',
@@ -747,29 +856,34 @@
       .then(d => {
         if (d.error) throw new Error(d.error);
         setMsg('ota-status', 'ok', '✓ Uploaded. Press "Send Update to ESP32" to install.');
-        document.getElementById('bin-file').value  = '';
+        document.getElementById('bin-file').value = '';
         document.getElementById('drop-label').innerText = '📁 Click to browse for .bin file...';
         document.getElementById('drop-zone').classList.remove('has-file');
-        document.getElementById('ota-note').value  = '';
+        document.getElementById('ota-note').value = '';
       })
       .catch(e => setMsg('ota-status', 'err', '✕ Upload failed: ' + (e.name === 'AbortError' ? 'Request timed out' : e.message)));
     }
 
     function sendUpdateCommand() {
-      if (!confirm('Send update command?\n\nThe ESP32 will download the new firmware and reboot. Make sure you have uploaded the correct .bin file first.')) return;
+      var deviceId = document.getElementById('device-select').value || null;
+      var dev      = deviceId ? knownDevices.find(function(d) { return d.id === deviceId; }) : null;
+      var target   = dev ? (dev.name || dev.id) : 'All Devices';
+      if (!confirm('Send update command to ' + target + '?\n\nThe ESP32 will download and install the new firmware then reboot. Make sure you have uploaded the correct .bin file first.')) return;
       setMsg('update-status', '', 'Sending update command...');
-      const ctrl = new AbortController();
+      const ctrl  = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 15000);
+      var body = { message: 'update' };
+      if (deviceId) body.device_id = deviceId;
       fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
-        body: JSON.stringify({ message: 'update' }),
+        body: JSON.stringify(body),
         signal: ctrl.signal
       })
       .then(r => { clearTimeout(timer); return r.json(); })
       .then(d => {
         if (d.error) throw new Error(d.error);
-        setMsg('update-status', 'ok', '✓ Update command sent — ESP32 will reboot shortly.');
+        setMsg('update-status', 'ok', '✓ Update command sent to ' + target + ' — ESP32 will reboot shortly.');
       })
       .catch(e => setMsg('update-status', 'err', '✕ Failed: ' + (e.name === 'AbortError' ? 'Request timed out' : e.message)));
     }
