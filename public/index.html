@@ -16,14 +16,16 @@
       margin: 0;
     }
     h1 { color: #00d4ff; margin-bottom: 8px; }
-    p  { color: #888; margin-bottom: 40px; }
+    .subtitle { color: #888; margin-bottom: 40px; }
     .card {
       background: #ffffff11;
       border-radius: 14px;
       padding: 30px;
       width: 100%;
       max-width: 500px;
+      margin-bottom: 24px;
     }
+    .card h2 { color: #00d4ff; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px; }
     input[type="text"] {
       width: 100%;
       padding: 14px 16px;
@@ -36,29 +38,31 @@
       outline: none;
     }
     input[type="text"]:focus { border-color: #00d4ff; }
-    button {
+    .btn {
       width: 100%;
       padding: 14px;
       font-size: 16px;
       font-weight: bold;
-      background: #00d4ff;
-      color: #000;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin-top: 4px;
     }
-    button:active { opacity: 0.8; }
-    #status {
-      margin-top: 16px;
+    .btn:active { opacity: 0.8; }
+    .btn-blue   { background: #00d4ff; color: #000; }
+    .btn-green  { background: #00cc66; color: #000; }
+    .btn-orange { background: #ff9900; color: #000; }
+    .status {
+      margin-top: 14px;
       font-size: 14px;
       color: #888;
       text-align: center;
       min-height: 20px;
     }
-    #status.ok  { color: #44ff88; }
-    #status.err { color: #ff4455; }
-    .log { margin-top: 30px; }
-    .log h2 { font-size: 14px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .status.ok  { color: #44ff88; }
+    .status.err { color: #ff4455; }
+    .log { margin-top: 24px; }
+    .log-title { font-size: 13px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
     .log-list { list-style: none; padding: 0; margin: 0; }
     .log-list li {
       padding: 8px 12px;
@@ -69,39 +73,84 @@
       color: #ccc;
     }
     .log-list li span { color: #555; font-size: 12px; margin-right: 8px; }
+    .file-drop {
+      border: 2px dashed #333;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      color: #555;
+      cursor: pointer;
+      margin-bottom: 14px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .file-drop.has-file { border-color: #00cc66; color: #00cc66; }
+    .file-drop:hover    { border-color: #00d4ff; color: #00d4ff; }
+    .file-drop input    { display: none; }
+    .warning {
+      background: #ff990022;
+      border: 1px solid #ff9900;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #ff9900;
+      margin-bottom: 14px;
+    }
   </style>
 </head>
 <body>
   <h1>ESP32 Command Center</h1>
-  <p>Type a message — the ESP32 will print it to its Serial Monitor</p>
+  <p class="subtitle">Control your ESP32 from anywhere</p>
 
+  <!-- Message Card -->
   <div class="card">
-    <input type="text" id="msg" placeholder="Type a message..." maxlength="200" />
-    <button onclick="send()">Send to ESP32</button>
-    <div id="status"></div>
+    <h2>Send Command</h2>
+    <input type="text" id="msg" placeholder="Type a message or command..." maxlength="200" />
+    <button class="btn btn-blue" onclick="sendMessage()">Send to ESP32</button>
+    <div class="status" id="msg-status"></div>
 
     <div class="log">
-      <h2>Sent Messages</h2>
+      <div class="log-title">Sent Messages</div>
       <ul class="log-list" id="log"></ul>
     </div>
   </div>
 
-  <script>
-    var log = [];
+  <!-- OTA Card -->
+  <div class="card">
+    <h2>Over the Air Update</h2>
+    <div class="warning">
+      Only upload a .bin file built from PlatformIO. A bad upload can brick the ESP32 and require a USB cable to fix.
+    </div>
 
+    <div class="file-drop" id="drop-zone" onclick="document.getElementById('bin-file').click()">
+      <input type="file" id="bin-file" accept=".bin" onchange="fileSelected(this)" />
+      <span id="drop-label">Click to select firmware .bin file</span>
+    </div>
+
+    <input type="text" id="ota-note" placeholder="Version note (optional)..." maxlength="100" />
+    <button class="btn btn-green" onclick="uploadFirmware()">Upload Firmware</button>
+    <div class="status" id="ota-status"></div>
+
+    <div class="log" id="ota-log-section" style="display:none">
+      <div class="log-title">Latest Firmware</div>
+      <ul class="log-list" id="ota-log"></ul>
+    </div>
+  </div>
+
+  <script>
+    var msgLog = [];
+
+    // ── Message Section ──────────────────────────────────────
     document.getElementById('msg').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') send();
+      if (e.key === 'Enter') sendMessage();
     });
 
-    function send() {
+    function sendMessage() {
       var input  = document.getElementById('msg');
-      var status = document.getElementById('status');
+      var status = document.getElementById('msg-status');
       var text   = input.value.trim();
       if (!text) return;
 
-      status.className = '';
-      status.innerText = 'Sending...';
-
+      setStatus('msg-status', '', 'Sending...');
       fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -109,26 +158,80 @@
       })
       .then(r => r.json())
       .then(() => {
-        status.className = 'ok';
-        status.innerText = 'Sent! ESP32 will pick it up within 3 seconds.';
-        addLog(text);
+        setStatus('msg-status', 'ok', 'Sent! ESP32 will pick it up within 3 seconds.');
+        addMsgLog(text);
         input.value = '';
-        setTimeout(() => { status.innerText = ''; }, 4000);
+        setTimeout(() => setStatus('msg-status', '', ''), 4000);
       })
-      .catch(() => {
-        status.className = 'err';
-        status.innerText = 'Failed to send. Check your connection.';
-      });
+      .catch(() => setStatus('msg-status', 'err', 'Failed to send.'));
     }
 
-    function addLog(text) {
+    function addMsgLog(text) {
       var now = new Date().toLocaleTimeString();
-      log.unshift({ text, time: now });
-      if (log.length > 10) log.pop();
-      var list = document.getElementById('log');
-      list.innerHTML = log.map(function(e) {
+      msgLog.unshift({ text, time: now });
+      if (msgLog.length > 10) msgLog.pop();
+      document.getElementById('log').innerHTML = msgLog.map(function(e) {
         return '<li><span>' + e.time + '</span>' + e.text + '</li>';
       }).join('');
+    }
+
+    // ── OTA Section ───────────────────────────────────────────
+    function fileSelected(input) {
+      var label = document.getElementById('drop-label');
+      var zone  = document.getElementById('drop-zone');
+      if (input.files[0]) {
+        label.innerText = input.files[0].name + ' (' + (input.files[0].size / 1024).toFixed(1) + ' KB)';
+        zone.classList.add('has-file');
+      }
+    }
+
+    function uploadFirmware() {
+      var fileInput = document.getElementById('bin-file');
+      var note      = document.getElementById('ota-note').value.trim();
+      var file      = fileInput.files[0];
+
+      if (!file) {
+        setStatus('ota-status', 'err', 'Please select a .bin file first.');
+        return;
+      }
+
+      setStatus('ota-status', '', 'Uploading firmware...');
+
+      fetch('/api/upload-firmware', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'x-note': note
+        },
+        body: file
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setStatus('ota-status', 'ok', 'Uploaded! Send "update" command to install on the ESP32.');
+        showLatestFirmware(file.name, note);
+        document.getElementById('bin-file').value = '';
+        document.getElementById('drop-label').innerText = 'Click to select firmware .bin file';
+        document.getElementById('drop-zone').classList.remove('has-file');
+        document.getElementById('ota-note').value = '';
+      })
+      .catch(err => setStatus('ota-status', 'err', 'Upload failed: ' + err.message));
+    }
+
+    function showLatestFirmware(name, note) {
+      var section = document.getElementById('ota-log-section');
+      var list    = document.getElementById('ota-log');
+      var now     = new Date().toLocaleTimeString();
+      var label   = name + (note ? ' — ' + note : '');
+      list.innerHTML = '<li><span>' + now + '</span>' + label + '</li>';
+      section.style.display = 'block';
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function setStatus(id, cls, text) {
+      var el = document.getElementById(id);
+      el.className = 'status ' + cls;
+      el.innerText = text;
     }
   </script>
 </body>
