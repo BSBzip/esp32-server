@@ -343,14 +343,6 @@
     }
 
     /* ── LOGIN DIALOG ───────────────────────────────────────── */
-    #login-wrap {
-      width: 100%;
-      max-width: 340px;
-      box-shadow: 4px 4px 16px rgba(0,0,0,0.6);
-      overflow: hidden;
-      border-radius: 6px 6px 3px 3px;
-    }
-
     .dlg-titlebar {
       background: linear-gradient(to bottom,
         #4A7FBF 0%, #2B5FCC 8%, #0A246A 15%, #0A246A 85%, #1E4BA8 92%, #4A7FBF 100%);
@@ -374,28 +366,212 @@
       background: linear-gradient(to right, transparent, #ACA899, transparent);
       margin: 12px 0;
     }
+
+    /* ── SPINNING 911 GT3 ─────────────────────────────── */
+    #login-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .login-dialog-wrap {
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 4px 4px 16px rgba(0,0,0,0.6);
+      overflow: hidden;
+      border-radius: 6px 6px 3px 3px;
+    }
+    .gt3-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gt3-svg {
+      width: 360px;
+      max-width: 94vw;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.7));
+      animation: gt3-spin 5s linear infinite;
+    }
+    @keyframes gt3-spin {
+      from { transform: perspective(1000px) rotateY(0deg); }
+      to   { transform: perspective(1000px) rotateY(360deg); }
+    }
+    .gt3-ground {
+      width: 260px;
+      max-width: 80vw;
+      height: 14px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 70%);
+      margin-top: -6px;
+      animation: gt3-shadow 5s linear infinite;
+    }
+    @keyframes gt3-shadow {
+      0%,100% { transform: scaleX(1);    opacity: 0.55; }
+      25%      { transform: scaleX(0.06); opacity: 0.08; }
+      50%      { transform: scaleX(1);    opacity: 0.55; }
+      75%      { transform: scaleX(0.06); opacity: 0.08; }
+    }
+    .gt3-label {
+      font-size: 9px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
 
   <!-- ── LOGIN ──────────────────────────────────────────────── -->
   <div id="login-wrap">
-    <div class="rainbow-bar">
-      <div class="rb-1"></div><div class="rb-2"></div><div class="rb-3"></div>
-      <div class="rb-4"></div><div class="rb-5"></div><div class="rb-6"></div>
+
+    <!-- Spinning Porsche 911 GT3 -->
+    <div class="gt3-stage">
+      <svg class="gt3-svg" viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#F8F8F8"/>
+            <stop offset="55%"  stop-color="#E2E2E2"/>
+            <stop offset="100%" stop-color="#B8B8B8"/>
+          </linearGradient>
+          <linearGradient id="g-rim" x1="0.2" y1="0.1" x2="0.8" y2="0.9">
+            <stop offset="0%"   stop-color="#C0C0C0"/>
+            <stop offset="45%"  stop-color="#606060"/>
+            <stop offset="100%" stop-color="#A8A8A8"/>
+          </linearGradient>
+          <linearGradient id="g-tire" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#2A2A2A"/>
+            <stop offset="100%" stop-color="#0A0A0A"/>
+          </linearGradient>
+          <linearGradient id="g-win" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stop-color="#CCE8FF" stop-opacity="0.92"/>
+            <stop offset="100%" stop-color="#5AAADE" stop-opacity="0.92"/>
+          </linearGradient>
+        </defs>
+
+        <!-- ── BODY ──────────────────────────────────────────── -->
+        <path d="
+          M 68,178
+          C 64,168 64,156 69,148
+          C 73,139 82,133 96,129
+          L 152,124 L 192,119
+          C 205,112 218,102 229,91
+          C 242,78 255,63 269,53
+          L 325,47
+          C 344,47 362,54 372,66
+          C 380,76 385,86 387,96
+          L 400,101
+          C 411,105 420,116 423,130
+          C 426,142 424,156 419,167
+          C 417,173 413,178 407,178 Z
+        " fill="url(#g-body)" stroke="#B0B0B0" stroke-width="1.5"/>
+
+        <!-- GT3 red accent stripe -->
+        <path d="M 196,121 L 230,95 C 243,82 256,66 270,56 L 274,53 L 272,50 C 257,61 244,77 231,90 L 197,117 Z"
+              fill="#CC0000" opacity="0.78"/>
+
+        <!-- ── WINDSHIELD ─────────────────────────────────────── -->
+        <path d="
+          M 232,92
+          C 245,79 258,65 271,56
+          L 323,51
+          C 342,51 358,58 368,69
+          L 383,88
+          C 370,84 354,80 336,80
+          L 312,80
+          C 299,82 290,90 283,100 Z
+        " fill="url(#g-win)" stroke="#5090BE" stroke-width="1"/>
+
+        <!-- ── SIDE WINDOW ─────────────────────────────────────── -->
+        <path d="
+          M 226,95
+          C 216,104 207,113 200,121
+          L 279,102
+          C 289,93 299,82 312,81
+          L 336,81 L 334,86 L 310,88
+          C 297,94 283,100 269,101 Z
+        " fill="url(#g-win)" stroke="#5090BE" stroke-width="1" opacity="0.72"/>
+
+        <!-- ── GT3 REAR WING ───────────────────────────────────── -->
+        <!-- Wing posts -->
+        <rect x="365" y="68" width="5" height="29" fill="#D4D4D4" stroke="#AAA" stroke-width="0.8"/>
+        <rect x="392" y="64" width="5" height="33" fill="#D4D4D4" stroke="#AAA" stroke-width="0.8"/>
+        <!-- Wing main element (angled like real GT3) -->
+        <path d="M 351,58 L 408,54 C 410,54 411,55 411,56 L 411,69 C 411,70 410,71 408,71 L 351,75 C 349,75 348,74 348,73 L 348,60 C 348,59 349,58 351,58 Z"
+              fill="#EEEEEE" stroke="#AAAAAA" stroke-width="1"/>
+        <!-- Endplates -->
+        <rect x="347" y="53" width="4" height="22" rx="1" fill="#C4C4C4" stroke="#999" stroke-width="0.5"/>
+        <rect x="408" y="49" width="4" height="22" rx="1" fill="#C4C4C4" stroke="#999" stroke-width="0.5"/>
+
+        <!-- ── HEADLIGHT (round, classic 911) ─────────────────── -->
+        <circle cx="82"  cy="161" r="9"  fill="#FFEE44" stroke="#CCAA00" stroke-width="1"/>
+        <circle cx="82"  cy="161" r="5"  fill="#FFFFF0" opacity="0.85"/>
+
+        <!-- ── TAILLIGHT ───────────────────────────────────────── -->
+        <rect x="413" y="157" width="8"  height="18" rx="2" fill="#EE1111" stroke="#990000" stroke-width="1"/>
+        <rect x="414" y="159" width="4"  height="6"  rx="1" fill="#FF8888" opacity="0.6"/>
+
+        <!-- ── DOOR LINE ───────────────────────────────────────── -->
+        <line x1="214" y1="124" x2="354" y2="114" stroke="#D0D0D0" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- ── FRONT SPLITTER ──────────────────────────────────── -->
+        <rect x="59"  y="175" width="46" height="4"  rx="1.5" fill="#727272"/>
+
+        <!-- ── REAR DIFFUSER ───────────────────────────────────── -->
+        <rect x="409" y="173" width="20" height="6"  rx="1.5" fill="#727272"/>
+
+        <!-- ── FRONT WHEEL ─────────────────────────────────────── -->
+        <circle cx="152" cy="178" r="37" fill="url(#g-tire)" stroke="#222" stroke-width="1"/>
+        <circle cx="152" cy="178" r="29" fill="url(#g-rim)"/>
+        <circle cx="152" cy="178" r="23" fill="#484848"/>
+        <!-- 5 spokes at 72° apart (r=20 from center) -->
+        <line x1="152" y1="178" x2="152"  y2="158"  stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="152" y1="178" x2="171"  y2="171.8" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="152" y1="178" x2="163.8" y2="194.2" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="152" y1="178" x2="140.2" y2="194.2" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="152" y1="178" x2="133"  y2="171.8" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Center-lock hub (gold, Porsche style) -->
+        <circle cx="152" cy="178" r="11" fill="#CCCC80" stroke="#AAAA40" stroke-width="1.5"/>
+        <circle cx="152" cy="178" r="4.5" fill="#88884A"/>
+        <!-- Brake caliper peek (red) -->
+        <circle cx="152" cy="178" r="17" fill="none" stroke="#CC0000" stroke-width="3" stroke-dasharray="6,24"/>
+
+        <!-- ── REAR WHEEL ───────────────────────────────────────── -->
+        <circle cx="402" cy="178" r="37" fill="url(#g-tire)" stroke="#222" stroke-width="1"/>
+        <circle cx="402" cy="178" r="29" fill="url(#g-rim)"/>
+        <circle cx="402" cy="178" r="23" fill="#484848"/>
+        <line x1="402" y1="178" x2="402"  y2="158"  stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="402" y1="178" x2="421"  y2="171.8" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="402" y1="178" x2="413.8" y2="194.2" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="402" y1="178" x2="390.2" y2="194.2" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="402" y1="178" x2="383"  y2="171.8" stroke="#939393" stroke-width="5.5" stroke-linecap="round"/>
+        <circle cx="402" cy="178" r="11" fill="#CCCC80" stroke="#AAAA40" stroke-width="1.5"/>
+        <circle cx="402" cy="178" r="4.5" fill="#88884A"/>
+        <circle cx="402" cy="178" r="17" fill="none" stroke="#CC0000" stroke-width="3" stroke-dasharray="6,24"/>
+      </svg>
+      <div class="gt3-ground"></div>
+      <div class="gt3-label">Porsche 911 GT3</div>
     </div>
-    <div class="dlg-titlebar">🖥️ ESP32 Command Center</div>
-    <div class="dlg-body">
-      <label class="xp-label">Email address:</label>
-      <input type="email" class="xp-input" id="email" />
-      <label class="xp-label">Password:</label>
-      <input type="password" class="xp-input" id="password" />
-      <div id="login-err" style="font-size:11px;color:#8A2A2A;min-height:16px;margin-bottom:8px;"></div>
-      <div class="dlg-separator"></div>
-      <div class="xp-btn-row">
-        <button class="xp-btn xp-btn-blue" onclick="login()">Sign In</button>
+
+    <!-- Login Dialog -->
+    <div class="login-dialog-wrap">
+      <div class="rainbow-bar">
+        <div class="rb-1"></div><div class="rb-2"></div><div class="rb-3"></div>
+        <div class="rb-4"></div><div class="rb-5"></div><div class="rb-6"></div>
+      </div>
+      <div class="dlg-titlebar">🖥️ ESP32 Command Center</div>
+      <div class="dlg-body">
+        <label class="xp-label">Email address:</label>
+        <input type="email" class="xp-input" id="email" />
+        <label class="xp-label">Password:</label>
+        <input type="password" class="xp-input" id="password" />
+        <div id="login-err" style="font-size:11px;color:#8A2A2A;min-height:16px;margin-bottom:8px;"></div>
+        <div class="dlg-separator"></div>
+        <div class="xp-btn-row">
+          <button class="xp-btn xp-btn-blue" onclick="login()">Sign In</button>
+        </div>
       </div>
     </div>
+
   </div>
 
   <!-- ── MAIN WINDOW ────────────────────────────────────────── -->
@@ -555,7 +731,7 @@
       await sb.auth.signOut();
       authToken = null;
       document.getElementById('main-wrap').style.display = 'none';
-      document.getElementById('login-wrap').style.display = 'block';
+      document.getElementById('login-wrap').style.display = 'flex';
       document.getElementById('password').value = '';
     }
 
