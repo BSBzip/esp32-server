@@ -4,185 +4,511 @@
   <title>ESP32 Command Center</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #1a1a2e;
-      color: white;
+      font-family: Tahoma, 'MS Sans Serif', Geneva, sans-serif;
+      font-size: 11px;
+      background: #1152A3;
+      background-image:
+        radial-gradient(ellipse at 30% 60%, #1A6BB5 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 30%, #0A3D91 0%, transparent 50%);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 60px 20px;
-      margin: 0;
+      justify-content: flex-start;
+      padding: 24px 10px 40px;
     }
-    h1 { color: #00d4ff; margin-bottom: 8px; }
-    .subtitle { color: #888; margin-bottom: 40px; }
-    .card {
-      background: #ffffff11;
-      border-radius: 14px;
-      padding: 30px;
+
+    /* ── XP WINDOW ──────────────────────────────────────────── */
+    .xp-window {
       width: 100%;
-      max-width: 500px;
-      margin-bottom: 24px;
+      max-width: 780px;
+      box-shadow: 4px 4px 16px rgba(0,0,0,0.7), 1px 1px 0 rgba(255,255,255,0.2) inset;
+      border-radius: 6px 6px 4px 4px;
+      overflow: hidden;
     }
-    .card h2 { color: #00d4ff; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px; }
-    input[type="text"], input[type="email"], input[type="password"] {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 16px;
-      border: 2px solid #333;
-      border-radius: 8px;
-      background: #0d0d1a;
-      color: white;
-      margin-bottom: 14px;
-      outline: none;
+
+    /* ── APPLE 1984 RAINBOW BAR ─────────────────────────────── */
+    .rainbow-bar {
+      display: flex;
+      height: 9px;
     }
-    input:focus { border-color: #00d4ff; }
-    .btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-    .btn:active { opacity: 0.8; }
-    .btn-blue  { background: #00d4ff; color: #000; }
-    .btn-green { background: #00cc66; color: #000; }
-    .btn-ghost { background: none; border: 1px solid #444; color: #888; font-size: 14px; padding: 8px 16px; width: auto; border-radius: 6px; }
-    .status {
-      margin-top: 14px;
-      font-size: 14px;
-      color: #888;
-      text-align: center;
-      min-height: 20px;
-    }
-    .status.ok  { color: #44ff88; }
-    .status.err { color: #ff4455; }
-    .log { margin-top: 24px; }
-    .log-title { font-size: 13px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-    .log-list { list-style: none; padding: 0; margin: 0; }
-    .log-list li { padding: 8px 12px; background: #ffffff08; border-radius: 6px; margin-bottom: 6px; font-size: 14px; color: #ccc; }
-    .log-list li span { color: #555; font-size: 12px; margin-right: 8px; }
-    .file-drop {
-      border: 2px dashed #333;
-      border-radius: 8px;
-      padding: 30px;
-      text-align: center;
-      color: #555;
-      cursor: pointer;
-      margin-bottom: 14px;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .file-drop.has-file { border-color: #00cc66; color: #00cc66; }
-    .file-drop:hover    { border-color: #00d4ff; color: #00d4ff; }
-    .file-drop input    { display: none; }
-    .warning {
-      background: #ff990022;
-      border: 1px solid #ff9900;
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: #ff9900;
-      margin-bottom: 14px;
-    }
-    .topbar {
+    .rainbow-bar div { flex: 1; }
+    .rb-1 { background: #FF2D00; }
+    .rb-2 { background: #FF9300; }
+    .rb-3 { background: #FFED00; }
+    .rb-4 { background: #00AA00; }
+    .rb-5 { background: #0057D8; }
+    .rb-6 { background: #8B008B; }
+
+    /* ── XP TITLE BAR ───────────────────────────────────────── */
+    .xp-titlebar {
+      background: linear-gradient(to bottom,
+        #4A7FBF 0%, #2B5FCC 8%, #0A246A 15%, #0A246A 85%, #1E4BA8 92%, #4A7FBF 100%);
+      padding: 4px 6px 4px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #ffffff08;
-      border-radius: 10px;
-      padding: 10px 16px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 500px;
-      font-size: 14px;
+      user-select: none;
     }
-    .topbar-info { color: #888; }
-    .topbar-info strong { color: #00d4ff; }
-    .role-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 12px;
+
+    .xp-title-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: white;
       font-weight: bold;
-      margin-left: 8px;
+      font-size: 12px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+      letter-spacing: 0.2px;
     }
-    .role-admin { background: #ff990033; color: #ff9900; }
-    .role-user  { background: #00d4ff22; color: #00d4ff; }
-    #login-wrap { width: 100%; max-width: 500px; }
-    #main-wrap  { width: 100%; display: none; flex-direction: column; align-items: center; }
+
+    .xp-winbtns { display: flex; gap: 2px; }
+
+    .xp-winbtn {
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: bold; color: white;
+      cursor: default;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+      border-top: 1px solid rgba(255,255,255,0.4);
+      border-left: 1px solid rgba(255,255,255,0.3);
+      border-right: 1px solid rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(0,0,0,0.4);
+    }
+
+    .xp-winbtn-min, .xp-winbtn-max {
+      background: linear-gradient(135deg, #5899E0 0%, #1566C4 40%, #0D4FAA 100%);
+    }
+    .xp-winbtn-close {
+      background: linear-gradient(135deg, #E07050 0%, #CC2211 40%, #AA1100 100%);
+    }
+    .xp-winbtn:hover { filter: brightness(1.2); }
+
+    /* ── TABS ───────────────────────────────────────────────── */
+    .xp-tabbar {
+      background: linear-gradient(to bottom, #D4D0C8 0%, #C8C4BC 100%);
+      border-bottom: 2px solid #8A8680;
+      padding: 6px 8px 0;
+      display: flex;
+      gap: 3px;
+    }
+
+    .xp-tab {
+      padding: 5px 18px 4px;
+      font-size: 11px;
+      cursor: pointer;
+      border: 1px solid #8A8680;
+      border-bottom: none;
+      background: linear-gradient(to bottom, #C8C4BC 0%, #B8B4AC 100%);
+      border-radius: 3px 3px 0 0;
+      color: #444;
+      position: relative;
+      top: 2px;
+      transition: background 0.1s;
+    }
+
+    .xp-tab:hover {
+      background: linear-gradient(to bottom, #E0DCD4 0%, #D4D0C8 100%);
+      color: #000;
+    }
+
+    .xp-tab.active {
+      background: #ECE9D8;
+      color: #000;
+      font-weight: bold;
+      border-bottom: 2px solid #ECE9D8;
+      top: 2px;
+      z-index: 2;
+    }
+
+    /* ── BODY ───────────────────────────────────────────────── */
+    .xp-body {
+      background: #ECE9D8;
+      padding: 14px;
+      min-height: 380px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── GROUP BOX ──────────────────────────────────────────── */
+    .xp-group {
+      border: 2px groove #ACA899;
+      padding: 14px 12px 12px;
+      margin-bottom: 12px;
+      position: relative;
+      background: #ECE9D8;
+    }
+
+    .xp-group-label {
+      position: absolute;
+      top: -8px; left: 10px;
+      background: #ECE9D8;
+      padding: 0 4px;
+      font-weight: bold;
+      font-size: 11px;
+      color: #000080;
+    }
+
+    /* ── INPUTS ─────────────────────────────────────────────── */
+    .xp-label {
+      display: block;
+      font-size: 11px;
+      margin-bottom: 3px;
+      color: #000;
+    }
+
+    .xp-input, .xp-select {
+      width: 100%;
+      padding: 4px 6px;
+      font-family: Tahoma, sans-serif;
+      font-size: 11px;
+      border: 2px inset #ACA899;
+      background: #fff;
+      color: #000;
+      outline: none;
+      margin-bottom: 8px;
+      border-radius: 0;
+    }
+
+    .xp-input:focus { border-color: #316AC5; background: #FAFEFF; }
+    .xp-select { cursor: pointer; }
+
+    /* ── BUTTONS ────────────────────────────────────────────── */
+    .xp-btn {
+      padding: 5px 18px;
+      font-family: Tahoma, sans-serif;
+      font-size: 11px;
+      border-radius: 3px;
+      cursor: pointer;
+      min-width: 80px;
+      border: 1px solid #7A96C2;
+      background: linear-gradient(to bottom, #FFFFFF 0%, #F0EDE4 50%, #E4E0D4 100%);
+      color: #000;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.15);
+      letter-spacing: 0.2px;
+    }
+
+    .xp-btn:hover {
+      background: linear-gradient(to bottom, #EBF3FD 0%, #C8DDF7 100%);
+      border-color: #316AC5;
+    }
+
+    .xp-btn:active {
+      background: linear-gradient(to bottom, #C8DDF7 0%, #EBF3FD 100%);
+      box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .xp-btn-blue {
+      background: linear-gradient(to bottom, #5A9FE0 0%, #1E72D0 50%, #1255B0 100%);
+      color: #fff;
+      border-color: #0A246A;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .xp-btn-blue:hover {
+      background: linear-gradient(to bottom, #70AFEF 0%, #2E82E0 50%, #2265C0 100%);
+    }
+
+    .xp-btn-green {
+      background: linear-gradient(to bottom, #7EDB7E 0%, #3A9E3A 50%, #286A28 100%);
+      color: #fff;
+      border-color: #1A5A1A;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .xp-btn-green:hover {
+      background: linear-gradient(to bottom, #8EEB8E 0%, #4AAE4A 50%, #389038 100%);
+    }
+
+    .xp-btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    /* ── LIST BOX ───────────────────────────────────────────── */
+    .xp-listbox {
+      background: #fff;
+      border: 2px inset #ACA899;
+      min-height: 70px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+
+    .xp-list-row {
+      padding: 3px 8px;
+      border-bottom: 1px solid #F0EDE4;
+      display: flex;
+      gap: 10px;
+    }
+
+    .xp-list-row:hover { background: #C8DCF8; }
+    .xp-list-row:nth-child(even) { background: #F5F4F0; }
+    .xp-list-row:nth-child(even):hover { background: #C8DCF8; }
+    .xp-list-time { color: #888; min-width: 58px; }
+
+    /* ── FILE DROP ──────────────────────────────────────────── */
+    .xp-filedrop {
+      border: 2px dashed #8A96C2;
+      background: #F8F7F2;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: #444;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .xp-filedrop:hover { background: #EBF3FD; border-color: #316AC5; }
+    .xp-filedrop.has-file { border-color: #2A8A2A; background: #EBF8EB; color: #2A8A2A; }
+    .xp-filedrop input { display: none; }
+
+    /* ── WARNING ────────────────────────────────────────────── */
+    .xp-warning {
+      background: #FFFBE6;
+      border: 1px solid #C8A000;
+      border-left: 4px solid #C8A000;
+      padding: 7px 10px;
+      font-size: 11px;
+      color: #7A5E00;
+      margin-bottom: 12px;
+    }
+
+    /* ── STATUS MESSAGES ────────────────────────────────────── */
+    .xp-msg {
+      font-size: 11px;
+      min-height: 20px;
+      margin-top: 6px;
+      padding: 3px 6px;
+    }
+    .xp-msg.ok  { background: #DFF0D8; border: 1px solid #5C9E5C; color: #2A6A2A; }
+    .xp-msg.err { background: #F2DEDE; border: 1px solid #C06060; color: #8A2A2A; }
+
+    /* ── STATUS BAR ─────────────────────────────────────────── */
+    .xp-statusbar {
+      background: linear-gradient(to bottom, #D4D0C8, #C4C0B8);
+      border-top: 1px solid #ACA899;
+      padding: 3px 8px;
+      display: flex;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .xp-sb-panel {
+      border: 1px inset #ACA899;
+      padding: 1px 8px;
+      background: #D4D0C8;
+      color: #000;
+    }
+
+    .xp-sb-panel.grow { flex: 1; }
+
+    /* ── ROLE BADGES ────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 1px 7px;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 2px;
+      margin-left: 4px;
+    }
+    .badge-admin { background: #FFE4CC; border: 1px solid #CC6600; color: #7A3A00; }
+    .badge-user  { background: #CCE4FF; border: 1px solid #0066CC; color: #00307A; }
+
+    /* ── HOW-TO LIST ────────────────────────────────────────── */
+    .xp-howto {
+      padding-left: 18px;
+      line-height: 2;
+      font-size: 11px;
+      color: #333;
+    }
+
+    .xp-howto li { margin-bottom: 2px; }
+    .xp-howto code {
+      background: #fff;
+      border: 1px solid #ACA899;
+      padding: 1px 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+    }
+
+    /* ── LOGIN DIALOG ───────────────────────────────────────── */
+    #login-wrap {
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 4px 4px 16px rgba(0,0,0,0.6);
+      overflow: hidden;
+      border-radius: 6px 6px 3px 3px;
+    }
+
+    .dlg-titlebar {
+      background: linear-gradient(to bottom,
+        #4A7FBF 0%, #2B5FCC 8%, #0A246A 15%, #0A246A 85%, #1E4BA8 92%, #4A7FBF 100%);
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .dlg-body {
+      background: #ECE9D8;
+      padding: 20px;
+    }
+
+    .dlg-separator {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #ACA899, transparent);
+      margin: 12px 0;
+    }
   </style>
 </head>
 <body>
-  <h1>ESP32 Command Center</h1>
-  <p class="subtitle">Control your ESP32 from anywhere</p>
 
-  <!-- Login -->
+  <!-- ── LOGIN ──────────────────────────────────────────────── -->
   <div id="login-wrap">
-    <div class="card">
-      <h2>Sign In</h2>
-      <input type="email"    id="email"    placeholder="Email address..." />
-      <input type="password" id="password" placeholder="Password..." />
-      <div class="status err" id="login-err"></div>
-      <button class="btn btn-blue" onclick="login()">Sign In</button>
+    <div class="rainbow-bar">
+      <div class="rb-1"></div><div class="rb-2"></div><div class="rb-3"></div>
+      <div class="rb-4"></div><div class="rb-5"></div><div class="rb-6"></div>
+    </div>
+    <div class="dlg-titlebar">🖥️ ESP32 Command Center</div>
+    <div class="dlg-body">
+      <label class="xp-label">Email address:</label>
+      <input type="email" class="xp-input" id="email" />
+      <label class="xp-label">Password:</label>
+      <input type="password" class="xp-input" id="password" />
+      <div id="login-err" style="font-size:11px;color:#8A2A2A;min-height:16px;margin-bottom:8px;"></div>
+      <div class="dlg-separator"></div>
+      <div class="xp-btn-row">
+        <button class="xp-btn xp-btn-blue" onclick="login()">Sign In</button>
+      </div>
     </div>
   </div>
 
-  <!-- Main (shown after login) -->
-  <div id="main-wrap">
-    <div class="topbar">
-      <div class="topbar-info">
-        Signed in as <strong id="user-email"></strong>
-        <span class="role-badge" id="role-badge"></span>
-      </div>
-      <button class="btn-ghost" onclick="logout()">Sign out</button>
-    </div>
+  <!-- ── MAIN WINDOW ────────────────────────────────────────── -->
+  <div id="main-wrap" style="display:none; width:100%; max-width:780px;">
+    <div class="xp-window">
 
-    <!-- Commands -->
-    <div class="card">
-      <h2>Send Command</h2>
-      <input type="text" id="msg" placeholder="Type a message or command..." maxlength="200" />
-      <button class="btn btn-blue" onclick="sendMessage()">Send to ESP32</button>
-      <div class="status" id="msg-status"></div>
-      <div class="log">
-        <div class="log-title">Sent Messages</div>
-        <ul class="log-list" id="log"></ul>
+      <div class="rainbow-bar">
+        <div class="rb-1"></div><div class="rb-2"></div><div class="rb-3"></div>
+        <div class="rb-4"></div><div class="rb-5"></div><div class="rb-6"></div>
       </div>
-    </div>
 
-    <!-- User Management (admin only) -->
-    <div class="card" id="users-card" style="display:none">
-      <h2>User Management</h2>
-      <input type="email"    id="new-email"    placeholder="Email address..." />
-      <input type="password" id="new-password" placeholder="Password..." />
-      <select id="new-role" style="width:100%;padding:14px 16px;font-size:16px;border:2px solid #333;border-radius:8px;background:#0d0d1a;color:white;margin-bottom:14px;outline:none;appearance:none;">
-        <option value="user">user — can send commands</option>
-        <option value="admin">admin — can send commands + upload firmware</option>
-      </select>
-      <button class="btn btn-blue" onclick="createUser()">Create User</button>
-      <div class="status" id="user-status"></div>
-      <div class="log" style="margin-top:24px">
-        <div class="log-title">Existing Users</div>
-        <ul class="log-list" id="user-list"></ul>
+      <div class="xp-titlebar">
+        <div class="xp-title-left">
+          <span>🖥️</span> ESP32 Command Center
+        </div>
+        <div class="xp-winbtns">
+          <div class="xp-winbtn xp-winbtn-min">─</div>
+          <div class="xp-winbtn xp-winbtn-max">&#9633;</div>
+          <div class="xp-winbtn xp-winbtn-close">✕</div>
+        </div>
       </div>
-    </div>
 
-    <!-- OTA (admin only) -->
-    <div class="card" id="ota-card" style="display:none">
-      <h2>Over the Air Update</h2>
-      <div class="warning">Only upload a .bin file built from PlatformIO. A bad upload can brick the ESP32 and require a USB cable to fix.</div>
-      <div class="file-drop" id="drop-zone" onclick="document.getElementById('bin-file').click()">
-        <input type="file" id="bin-file" accept=".bin" onchange="fileSelected(this)" />
-        <span id="drop-label">Click to select firmware .bin file</span>
+      <div class="xp-tabbar">
+        <div class="xp-tab active" id="tab-commands" onclick="switchTab('commands')">📡 Commands</div>
+        <div class="xp-tab" id="tab-users"    onclick="switchTab('users')"    style="display:none">👥 Users</div>
+        <div class="xp-tab" id="tab-firmware" onclick="switchTab('firmware')" style="display:none">💾 Firmware</div>
       </div>
-      <input type="text" id="ota-note" placeholder="Version note (optional)..." maxlength="100" />
-      <button class="btn btn-green" onclick="uploadFirmware()">Upload Firmware</button>
-      <div class="status" id="ota-status"></div>
-    </div>
-  </div>
+
+      <div class="xp-body">
+
+        <!-- Commands Tab -->
+        <div class="tab-panel active" id="panel-commands">
+          <div class="xp-group">
+            <div class="xp-group-label">Send Command</div>
+            <label class="xp-label">Message or command:</label>
+            <input type="text" class="xp-input" id="msg" maxlength="200" />
+            <div class="xp-btn-row">
+              <button class="xp-btn xp-btn-blue" onclick="sendMessage()">Send to ESP32 →</button>
+            </div>
+            <div class="xp-msg" id="msg-status"></div>
+          </div>
+          <div class="xp-group">
+            <div class="xp-group-label">Sent Messages</div>
+            <div class="xp-listbox" id="log"></div>
+          </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div class="tab-panel" id="panel-users">
+          <div class="xp-group">
+            <div class="xp-group-label">Create New User</div>
+            <label class="xp-label">Email address:</label>
+            <input type="email" class="xp-input" id="new-email" />
+            <label class="xp-label">Password:</label>
+            <input type="password" class="xp-input" id="new-password" />
+            <label class="xp-label">Role:</label>
+            <select class="xp-select" id="new-role">
+              <option value="user">User — can send commands only</option>
+              <option value="admin">Admin — can send commands and upload firmware</option>
+            </select>
+            <div class="xp-btn-row">
+              <button class="xp-btn xp-btn-blue" onclick="createUser()">Create User</button>
+            </div>
+            <div class="xp-msg" id="user-status"></div>
+          </div>
+          <div class="xp-group">
+            <div class="xp-group-label">All Users</div>
+            <div class="xp-listbox" id="user-list" style="max-height:200px;"></div>
+          </div>
+        </div>
+
+        <!-- Firmware Tab -->
+        <div class="tab-panel" id="panel-firmware">
+          <div class="xp-warning">
+            ⚠️ Only upload a .bin file built from PlatformIO. A bad upload can brick the ESP32 and require a USB cable to recover.
+          </div>
+          <div class="xp-group">
+            <div class="xp-group-label">Upload Firmware</div>
+            <div class="xp-filedrop" id="drop-zone" onclick="document.getElementById('bin-file').click()">
+              <input type="file" id="bin-file" accept=".bin" onchange="fileSelected(this)" />
+              <span id="drop-label">📁 Click to browse for .bin file...</span>
+            </div>
+            <label class="xp-label">Version note (optional):</label>
+            <input type="text" class="xp-input" id="ota-note" maxlength="100" />
+            <div class="xp-btn-row">
+              <button class="xp-btn xp-btn-green" onclick="uploadFirmware()">Upload Firmware</button>
+            </div>
+            <div class="xp-msg" id="ota-status"></div>
+          </div>
+          <div class="xp-group">
+            <div class="xp-group-label">How to update the ESP32 wirelessly</div>
+            <ol class="xp-howto">
+              <li>Make your code changes in VS Code</li>
+              <li>Click the <strong>✓ checkmark</strong> in VS Code to build</li>
+              <li>Upload the <code>firmware.bin</code> file using the form above</li>
+              <li>Go to the <strong>Commands</strong> tab and send <code>update</code></li>
+              <li>The ESP32 downloads and installs automatically, then reboots</li>
+            </ol>
+          </div>
+        </div>
+
+      </div><!-- /xp-body -->
+
+      <div class="xp-statusbar">
+        <div class="xp-sb-panel grow">
+          Signed in as: <strong id="sb-email">—</strong>
+          <span id="sb-badge"></span>
+        </div>
+        <div class="xp-sb-panel">ESP32 Command Center</div>
+      </div>
+
+    </div><!-- /xp-window -->
+  </div><!-- /main-wrap -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
@@ -192,10 +518,23 @@
       'sb_publishable_Qkg21mbk2gMhEQB2G99oAw_YkhE6bM1'
     );
 
-    var msgLog   = [];
+    var msgLog    = [];
     var authToken = null;
+    var activeTab = 'commands';
 
-    // ── Auth ──────────────────────────────────────────────────
+    // ── TABS ──────────────────────────────────────────────────
+    function switchTab(name) {
+      ['commands','users','firmware'].forEach(function(t) {
+        document.getElementById('tab-' + t)?.classList.remove('active');
+        var p = document.getElementById('panel-' + t);
+        if (p) p.classList.remove('active');
+      });
+      document.getElementById('tab-' + name).classList.add('active');
+      document.getElementById('panel-' + name).classList.add('active');
+      activeTab = name;
+    }
+
+    // ── AUTH ───────────────────────────────────────────────────
     async function login() {
       var email = document.getElementById('email').value.trim();
       var pw    = document.getElementById('password').value;
@@ -206,7 +545,7 @@
       if (error) { err.innerText = error.message; return; }
 
       authToken = data.session.access_token;
-      await loadMain();
+      await showMain();
     }
 
     async function logout() {
@@ -217,70 +556,109 @@
       document.getElementById('password').value = '';
     }
 
-    async function loadMain() {
-      var res  = await fetch('/api/get-role', { headers: { 'Authorization': 'Bearer ' + authToken } });
+    async function showMain() {
+      var res  = await fetch('/api/get-role', { headers: { Authorization: 'Bearer ' + authToken } });
       var data = await res.json();
-
-      document.getElementById('user-email').innerText = data.email;
-
-      var badge = document.getElementById('role-badge');
-      badge.innerText   = data.role;
-      badge.className   = 'role-badge role-' + data.role;
-
       var isAdmin = data.role === 'admin';
-      document.getElementById('ota-card').style.display   = isAdmin ? 'block' : 'none';
-      document.getElementById('users-card').style.display = isAdmin ? 'block' : 'none';
-      if (isAdmin) loadUsers();
+
+      document.getElementById('sb-email').innerText = data.email || '';
+      document.getElementById('sb-badge').innerHTML = isAdmin
+        ? '<span class="badge badge-admin">Admin</span>'
+        : '<span class="badge badge-user">User</span>';
+
+      document.getElementById('tab-users').style.display    = isAdmin ? '' : 'none';
+      document.getElementById('tab-firmware').style.display = isAdmin ? '' : 'none';
 
       document.getElementById('login-wrap').style.display = 'none';
-      document.getElementById('main-wrap').style.display  = 'flex';
+      document.getElementById('main-wrap').style.display  = 'block';
+
+      if (isAdmin) loadUsers();
     }
 
     window.onload = async function() {
       var { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        authToken = session.access_token;
-        await loadMain();
-      }
-      document.getElementById('password').addEventListener('keydown', function(e) { if (e.key === 'Enter') login(); });
-      document.getElementById('msg').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendMessage(); });
+      if (session) { authToken = session.access_token; await showMain(); }
+      document.getElementById('password').addEventListener('keydown', function(e) { if (e.key==='Enter') login(); });
+      document.getElementById('msg').addEventListener('keydown', function(e) { if (e.key==='Enter') sendMessage(); });
     };
 
-    // ── Messages ──────────────────────────────────────────────
+    // ── MESSAGES ───────────────────────────────────────────────
     function sendMessage() {
       var input = document.getElementById('msg');
       var text  = input.value.trim();
       if (!text) return;
 
-      setStatus('msg-status', '', 'Sending...');
+      setMsg('msg-status', '', 'Sending...');
       fetch('/api/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
         body: JSON.stringify({ message: text })
       })
       .then(r => r.json())
       .then(d => {
         if (d.error) throw new Error(d.error);
-        setStatus('msg-status', 'ok', 'Sent! ESP32 will pick it up within 3 seconds.');
+        setMsg('msg-status', 'ok', '✓ Sent — ESP32 will pick it up within 3 seconds.');
         addLog(text); input.value = '';
-        setTimeout(() => setStatus('msg-status', '', ''), 4000);
+        setTimeout(() => setMsg('msg-status', '', ''), 5000);
       })
-      .catch(e => setStatus('msg-status', 'err', e.message));
+      .catch(e => setMsg('msg-status', 'err', '✕ ' + e.message));
     }
 
     function addLog(text) {
       var now = new Date().toLocaleTimeString();
       msgLog.unshift({ text, time: now });
-      if (msgLog.length > 10) msgLog.pop();
+      if (msgLog.length > 20) msgLog.pop();
       document.getElementById('log').innerHTML = msgLog.map(function(e) {
-        return '<li><span>' + e.time + '</span>' + e.text + '</li>';
+        return '<div class="xp-list-row"><span class="xp-list-time">' + e.time + '</span>' + e.text + '</div>';
       }).join('');
     }
 
-    // ── OTA ───────────────────────────────────────────────────
+    // ── USERS ──────────────────────────────────────────────────
+    function createUser() {
+      var email   = document.getElementById('new-email').value.trim();
+      var pw      = document.getElementById('new-password').value;
+      var newRole = document.getElementById('new-role').value;
+      if (!email || !pw) { setMsg('user-status', 'err', '✕ Email and password are required.'); return; }
+
+      setMsg('user-status', '', 'Creating user...');
+      fetch('/api/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
+        body: JSON.stringify({ email, password: pw, newRole })
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) throw new Error(d.error);
+        setMsg('user-status', 'ok', '✓ User ' + d.email + ' created successfully.');
+        document.getElementById('new-email').value    = '';
+        document.getElementById('new-password').value = '';
+        loadUsers();
+        setTimeout(() => setMsg('user-status', '', ''), 5000);
+      })
+      .catch(e => setMsg('user-status', 'err', '✕ ' + e.message));
+    }
+
+    function loadUsers() {
+      fetch('/api/list-users', { headers: { Authorization: 'Bearer ' + authToken } })
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) return;
+        document.getElementById('user-list').innerHTML = d.users.map(function(u) {
+          var badge = u.role === 'admin'
+            ? '<span class="badge badge-admin">Admin</span>'
+            : u.role === 'user'
+            ? '<span class="badge badge-user">User</span>'
+            : '<span style="color:#888">No role</span>';
+          var date = new Date(u.created_at).toLocaleDateString();
+          return '<div class="xp-list-row"><span class="xp-list-time">' + date + '</span>' + u.email + badge + '</div>';
+        }).join('');
+      });
+    }
+
+    // ── FIRMWARE ───────────────────────────────────────────────
     function fileSelected(input) {
       if (input.files[0]) {
-        document.getElementById('drop-label').innerText = input.files[0].name + ' (' + (input.files[0].size / 1024).toFixed(1) + ' KB)';
+        document.getElementById('drop-label').innerText = '📄 ' + input.files[0].name + '  (' + (input.files[0].size / 1024).toFixed(1) + ' KB)';
         document.getElementById('drop-zone').classList.add('has-file');
       }
     }
@@ -288,70 +666,30 @@
     function uploadFirmware() {
       var file = document.getElementById('bin-file').files[0];
       var note = document.getElementById('ota-note').value.trim();
-      if (!file) { setStatus('ota-status', 'err', 'Please select a .bin file first.'); return; }
+      if (!file) { setMsg('ota-status', 'err', '✕ Please select a .bin file first.'); return; }
 
-      setStatus('ota-status', '', 'Uploading firmware...');
+      setMsg('ota-status', '', 'Uploading firmware...');
       fetch('/api/upload-firmware', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/octet-stream', 'x-note': note, 'Authorization': 'Bearer ' + authToken },
+        headers: { 'Content-Type': 'application/octet-stream', 'x-note': note, Authorization: 'Bearer ' + authToken },
         body: file
       })
       .then(r => r.json())
       .then(d => {
         if (d.error) throw new Error(d.error);
-        setStatus('ota-status', 'ok', 'Uploaded! Send "update" command to install on ESP32.');
-        document.getElementById('bin-file').value = '';
-        document.getElementById('drop-label').innerText = 'Click to select firmware .bin file';
+        setMsg('ota-status', 'ok', '✓ Uploaded. Go to Commands and send "update" to install.');
+        document.getElementById('bin-file').value  = '';
+        document.getElementById('drop-label').innerText = '📁 Click to browse for .bin file...';
         document.getElementById('drop-zone').classList.remove('has-file');
-        document.getElementById('ota-note').value = '';
+        document.getElementById('ota-note').value  = '';
       })
-      .catch(e => setStatus('ota-status', 'err', 'Upload failed: ' + e.message));
+      .catch(e => setMsg('ota-status', 'err', '✕ Upload failed: ' + e.message));
     }
 
-    // ── User Management ───────────────────────────────────────
-    function createUser() {
-      var email    = document.getElementById('new-email').value.trim();
-      var password = document.getElementById('new-password').value;
-      var newRole  = document.getElementById('new-role').value;
-      if (!email || !password) { setStatus('user-status', 'err', 'Email and password are required.'); return; }
-
-      setStatus('user-status', '', 'Creating user...');
-      fetch('/api/create-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-        body: JSON.stringify({ email, password, newRole })
-      })
-      .then(r => r.json())
-      .then(d => {
-        if (d.error) throw new Error(d.error);
-        setStatus('user-status', 'ok', 'User ' + d.email + ' created successfully!');
-        document.getElementById('new-email').value    = '';
-        document.getElementById('new-password').value = '';
-        loadUsers();
-        setTimeout(() => setStatus('user-status', '', ''), 4000);
-      })
-      .catch(e => setStatus('user-status', 'err', e.message));
-    }
-
-    function loadUsers() {
-      fetch('/api/list-users', { headers: { 'Authorization': 'Bearer ' + authToken } })
-      .then(r => r.json())
-      .then(d => {
-        if (d.error) return;
-        var list = document.getElementById('user-list');
-        list.innerHTML = d.users.map(function(u) {
-          var badge = u.role === 'admin'
-            ? '<span class="role-badge role-admin">admin</span>'
-            : '<span class="role-badge role-user">user</span>';
-          return '<li><span>' + new Date(u.created_at).toLocaleDateString() + '</span>' + u.email + ' ' + badge + '</li>';
-        }).join('');
-      });
-    }
-
-    // ── Helpers ───────────────────────────────────────────────
-    function setStatus(id, cls, text) {
+    // ── HELPERS ────────────────────────────────────────────────
+    function setMsg(id, type, text) {
       var el = document.getElementById(id);
-      el.className = 'status ' + cls;
+      el.className = 'xp-msg' + (type ? ' ' + type : '');
       el.innerText = text;
     }
   </script>
