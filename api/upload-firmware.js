@@ -1,14 +1,19 @@
 import { put } from '@vercel/blob';
 import { createClient } from '@supabase/supabase-js';
 
-export const config = {
-  api: { bodyParser: false },
-};
-
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_PUBLISHABLE_KEY
 );
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,18 +23,23 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'POST') {
-    const note     = req.headers['x-note'] || '';
-    const filename = `firmware-${Date.now()}.bin`;
+    try {
+      const note     = req.headers['x-note'] || '';
+      const filename = `firmware-${Date.now()}.bin`;
+      const body     = await readBody(req);
 
-    const blob = await put(filename, req, {
-      access: 'public',
-      contentType: 'application/octet-stream',
-    });
+      const blob = await put(filename, body, {
+        access: 'public',
+        contentType: 'application/octet-stream',
+      });
 
-    const { error } = await supabase.from('firmware').insert({ url: blob.url, note });
-    if (error) return res.status(500).json({ error: error.message });
+      const { error } = await supabase.from('firmware').insert({ url: blob.url, note });
+      if (error) return res.status(500).json({ error: error.message });
 
-    return res.status(200).json({ url: blob.url });
+      return res.status(200).json({ url: blob.url });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   res.status(405).json({ error: 'Method not allowed' });
