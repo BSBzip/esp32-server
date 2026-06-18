@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getUser, getRole } from './_auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -17,14 +18,16 @@ function readBody(req) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-note, x-admin-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-note, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'POST') {
-    if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const role = await getRole(user.id);
+    if (role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
     try {
       const note     = req.headers['x-note'] || '';
