@@ -153,6 +153,23 @@
       </div>
     </div>
 
+    <!-- User Management (admin only) -->
+    <div class="card" id="users-card" style="display:none">
+      <h2>User Management</h2>
+      <input type="email"    id="new-email"    placeholder="Email address..." />
+      <input type="password" id="new-password" placeholder="Password..." />
+      <select id="new-role" style="width:100%;padding:14px 16px;font-size:16px;border:2px solid #333;border-radius:8px;background:#0d0d1a;color:white;margin-bottom:14px;outline:none;appearance:none;">
+        <option value="user">user — can send commands</option>
+        <option value="admin">admin — can send commands + upload firmware</option>
+      </select>
+      <button class="btn btn-blue" onclick="createUser()">Create User</button>
+      <div class="status" id="user-status"></div>
+      <div class="log" style="margin-top:24px">
+        <div class="log-title">Existing Users</div>
+        <ul class="log-list" id="user-list"></ul>
+      </div>
+    </div>
+
     <!-- OTA (admin only) -->
     <div class="card" id="ota-card" style="display:none">
       <h2>Over the Air Update</h2>
@@ -210,7 +227,10 @@
       badge.innerText   = data.role;
       badge.className   = 'role-badge role-' + data.role;
 
-      document.getElementById('ota-card').style.display = data.role === 'admin' ? 'block' : 'none';
+      var isAdmin = data.role === 'admin';
+      document.getElementById('ota-card').style.display   = isAdmin ? 'block' : 'none';
+      document.getElementById('users-card').style.display = isAdmin ? 'block' : 'none';
+      if (isAdmin) loadUsers();
 
       document.getElementById('login-wrap').style.display = 'none';
       document.getElementById('main-wrap').style.display  = 'flex';
@@ -286,6 +306,46 @@
         document.getElementById('ota-note').value = '';
       })
       .catch(e => setStatus('ota-status', 'err', 'Upload failed: ' + e.message));
+    }
+
+    // ── User Management ───────────────────────────────────────
+    function createUser() {
+      var email    = document.getElementById('new-email').value.trim();
+      var password = document.getElementById('new-password').value;
+      var newRole  = document.getElementById('new-role').value;
+      if (!email || !password) { setStatus('user-status', 'err', 'Email and password are required.'); return; }
+
+      setStatus('user-status', '', 'Creating user...');
+      fetch('/api/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ email, password, newRole })
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) throw new Error(d.error);
+        setStatus('user-status', 'ok', 'User ' + d.email + ' created successfully!');
+        document.getElementById('new-email').value    = '';
+        document.getElementById('new-password').value = '';
+        loadUsers();
+        setTimeout(() => setStatus('user-status', '', ''), 4000);
+      })
+      .catch(e => setStatus('user-status', 'err', e.message));
+    }
+
+    function loadUsers() {
+      fetch('/api/list-users', { headers: { 'Authorization': 'Bearer ' + authToken } })
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) return;
+        var list = document.getElementById('user-list');
+        list.innerHTML = d.users.map(function(u) {
+          var badge = u.role === 'admin'
+            ? '<span class="role-badge role-admin">admin</span>'
+            : '<span class="role-badge role-user">user</span>';
+          return '<li><span>' + new Date(u.created_at).toLocaleDateString() + '</span>' + u.email + ' ' + badge + '</li>';
+        }).join('');
+      });
     }
 
     // ── Helpers ───────────────────────────────────────────────
